@@ -69,16 +69,83 @@
 <script>
   document.addEventListener("DOMContentLoaded", function () {
 const items = [
-  { id: 1, title: "Charles Haughey", type: "Politician", tags: ["Moriarty Tribunal", "Irish Politics", "Corruption"] },
-  { id: 2, title: "Ben Dunne", type: "Businessman", tags: ["Moriarty Tribunal", "Business", "Corruption"] },
-  { id: 3, title: "Moriarty Tribunal", type: "Event", tags: ["Irish Politics", "Corruption", "Investigation"] },
-  { id: 4, title: "Dunne's Business Interests", type: "Company", tags: ["Ben Dunne", "Business", "Moriarty Tribunal"] },
-  { id: 5, title: "John O'Leary", type: "Politician", tags: ["Moriarty Tribunal", "Irish Politics"] },
-  { id: 6, title: "Moriarty Inquiry Findings", type: "Event", tags: ["Moriarty Tribunal", "Corruption"] },
-  { id: 7, title: "AIB Bank", type: "Company", tags: ["Business", "Moriarty Tribunal", "Corruption"] },
-  { id: 8, title: "Public Opinion", type: "Subject", tags: ["Moriarty Tribunal", "Irish Politics", "Corruption"] },
-  { id: 9, title: "Bribes and Payments", type: "Event", tags: ["Moriarty Tribunal", "Corruption", "Bribery"] },
-  { id: 10, title: "Irish Government Response", type: "Event", tags: ["Moriarty Tribunal", "Politics"] }
+  // Key Figures
+  { id: 1, title: "Charles Haughey", type: "Politician", tags: ["Former Taoiseach", "Payments Investigation", "Main Subject", "Ansbacher Accounts"] },
+  { id: 2, title: "Ben Dunne", type: "Businessman", tags: ["Payments Source", "Dunnes Stores", "Key Witness", "Donations"] },
+  { id: 3, title: "Michael Lowry", type: "Politician", tags: ["Former Communications Minister", "Fine Gael", "Payments Investigation", "Esat Digifone"] },
+  { id: 4, title: "Denis O'Brien", type: "Businessman", tags: ["Esat Digifone", "GSM License", "Payments Investigation", "Key Subject"] },
+  { id: 5, title: "Mr Justice Michael Moriarty", type: "Legal", tags: ["Tribunal Chairman", "Report Author", "Judicial Oversight"] },
+  { id: 6, title: "Des Traynor", type: "Businessman", tags: ["Financial Advisor", "Ansbacher Accounts", "Haughey Connection", "Banking"] },
+
+  // Key Companies and Entities
+  { id: 7, title: "Esat Digifone", type: "Company", tags: ["GSM License", "Telecommunications", "Denis O'Brien", "Investigation Subject"] },
+  { id: 8, title: "Dunnes Stores", type: "Company", tags: ["Ben Dunne", "Payment Source", "Retail Business", "Investigation"] },
+  { id: 9, title: "Ansbacher Bank", type: "Company", tags: ["Offshore Accounts", "Banking", "Tax Evasion", "Financial Investigation"] },
+  { id: 10, title: "Celtic Helicopters", type: "Company", tags: ["Haughey Connection", "Business Interest", "Payment Investigation"] },
+
+  // Key Events
+  { id: 11, title: "Tribunal Establishment 1997", type: "Event", tags: ["Investigation Launch", "Terms of Reference", "Political Response"] },
+  { id: 12, title: "GSM License Award 1995", type: "Event", tags: ["Esat Digifone", "Telecommunications", "Key Decision", "Investigation Focus"] },
+  { id: 13, title: "Dunne Payments Revelation", type: "Event", tags: ["Ben Dunne", "Charles Haughey", "Financial Investigation"] },
+  { id: 14, title: "Ansbacher Discovery", type: "Event", tags: ["Offshore Accounts", "Banking Investigation", "Tax Evasion"] },
+  { id: 15, title: "Final Report 2011", type: "Document", tags: ["Investigation Conclusions", "Findings", "Recommendations"] },
+
+  // Investigation Components
+  { id: 16, title: "Haughey Payments Module", type: "Investigation", tags: ["Charles Haughey", "Financial Investigation", "Political Corruption"] },
+  { id: 17, title: "Lowry Payments Module", type: "Investigation", tags: ["Michael Lowry", "Financial Investigation", "Political Payments"] },
+  { id: 18, title: "GSM License Module", type: "Investigation", tags: ["Telecommunications", "Procurement", "Corruption Investigation"] },
+  { id: 19, title: "Ansbacher Module", type: "Investigation", tags: ["Banking", "Offshore Accounts", "Financial Investigation"] },
+
+  // Key Findings
+  { id: 20, title: "Haughey Payments Finding", type: "Finding", tags: ["Charles Haughey", "Corruption", "Political Misconduct"] },
+  { id: 21, title: "Lowry License Finding", type: "Finding", tags: ["Michael Lowry", "GSM License", "Misconduct"] },
+  { id: 22, title: "O'Brien Payments Finding", type: "Finding", tags: ["Denis O'Brien", "Financial Investigation", "Business Dealings"] },
+  { id: 23, title: "Tax Evasion Finding", type: "Finding", tags: ["Ansbacher Accounts", "Banking", "Financial Misconduct"] },
+
+  // Key Witnesses
+  { id: 24, title: "Banking Officials", type: "Witnesses", tags: ["Financial Evidence", "Banking Investigation", "Testimony"] },
+  { id: 25, title: "Civil Servants", type: "Witnesses", tags: ["Government Evidence", "Administrative", "Testimony"] },
+  { id: 26, title: "Political Staff", type: "Witnesses", tags: ["Government Operations", "Political Evidence", "Testimony"] },
+  { id: 27, title: "Business Executives", type: "Witnesses", tags: ["Corporate Evidence", "Commercial Dealings", "Testimony"] },
+
+  // Financial Aspects
+  { id: 28, title: "Haughey Financial Affairs", type: "Subject", tags: ["Personal Finances", "Political Funding", "Investigation"] },
+  { id: 29, title: "Lowry Financial Affairs", type: "Subject", tags: ["Personal Finances", "Political Funding", "Investigation"] },
+  { id: 30, title: "Offshore Transactions", type: "Subject", tags: ["Banking", "Financial Investigation", "Money Movement"] },
+
+  // Legal Process
+  { id: 31, title: "Tribunal Legal Team", type: "Group", tags: ["Investigation Staff", "Legal Proceedings", "Evidence Collection"] },
+  { id: 32, title: "Dublin Castle Hearings", type: "Event", tags: ["Testimony", "Evidence Gathering", "Legal Proceedings"] },
+  { id: 33, title: "Witness Interviews", type: "Event", tags: ["Evidence Collection", "Testimony", "Investigation Process"] },
+
+  // Documentation
+  { id: 34, title: "Interim Reports", type: "Document", tags: ["Investigation Progress", "Findings", "Documentation"] },
+  { id: 35, title: "Bank Records", type: "Document", tags: ["Financial Evidence", "Investigation Material", "Documentation"] },
+  { id: 36, title: "Payment Records", type: "Document", tags: ["Financial Transactions", "Evidence", "Investigation Material"] },
+
+  // Related Organizations
+  { id: 37, title: "Department of Communications", type: "Organization", tags: ["GSM License", "Government", "Investigation Subject"] },
+  { id: 38, title: "Fine Gael Party", type: "Organization", tags: ["Michael Lowry", "Political Party", "Investigation Context"] },
+  { id: 39, title: "Fianna Fáil Party", type: "Organization", tags: ["Charles Haughey", "Political Party", "Investigation Context"] },
+
+  // Financial Institutions
+  { id: 40, title: "Guinness & Mahon Bank", type: "Company", tags: ["Banking", "Ansbacher Accounts", "Financial Investigation"] },
+  { id: 41, title: "AIB Bank", type: "Company", tags: ["Banking", "Financial Services", "Investigation Evidence"] },
+
+  // Additional Key Events
+  { id: 42, title: "Terms of Reference Publication", type: "Event", tags: ["Investigation Scope", "Legal Framework", "Tribunal Setup"] },
+  { id: 43, title: "First Public Hearings", type: "Event", tags: ["Investigation Process", "Evidence Collection", "Testimony"] },
+  { id: 44, title: "Evidence Discovery Process", type: "Event", tags: ["Document Collection", "Investigation Process", "Evidence"] },
+
+  // Investigation Outcomes
+  { id: 45, title: "Criminal Referrals", type: "Outcome", tags: ["Legal Consequences", "Investigation Results", "Recommendations"] },
+  { id: 46, title: "Legislative Recommendations", type: "Outcome", tags: ["Reform Proposals", "Investigation Results", "Governance"] },
+  { id: 47, title: "Policy Changes", type: "Outcome", tags: ["Government Reform", "Investigation Impact", "Recommendations"] },
+
+  // Key Locations
+  { id: 48, title: "Dublin Castle Tribunal Chambers", type: "Location", tags: ["Hearings Venue", "Investigation Site", "Legal Proceedings"] },
+  { id: 49, title: "Abbeville Estate", type: "Location", tags: ["Haughey Property", "Investigation Subject", "Asset Investigation"] },
+  { id: 50, title: "Offshore Banking Locations", type: "Location", tags: ["Financial Investigation", "Banking", "International"] }
 ];
 
   const nodes = new vis.DataSet([]);
