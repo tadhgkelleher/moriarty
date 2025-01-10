@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moriarty Tribunal Network</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #1e1e2f;
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+    }
+
+    #connections-graph-container {
+      position: relative;
+      background-color: #1e1e2f;
+      margin: 0 auto;
+      width: 100%;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #connections-graph {
+      height: 700px;
+      width: 100%;
+      border: 1px solid #333;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: -200px; /* Raises the graph by 100px */
+    }
+
+    .toggle-physics-button {
+      background-color: #4a90e2;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      font-size: 18px;
+      margin: 0 auto;
+      cursor: pointer;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 10px;
+      z-index: 9999;
+      transition: background-color 0.3s ease;
+    }
+
+    .toggle-physics-button:hover {
+      background-color: #357abd;
+    }
+
+    .toggle-physics-button:active {
+      transform: translateY(1px);
+    }
+  </style>
+</head>
+<body>
+
+<div id="connections-graph-container">
+  <button class="toggle-physics-button">Push Button</button>
+  <div id="connections-graph"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+const items = [
+  { id: 1, title: "Charles Haughey", type: "Politician", tags: ["Moriarty Tribunal", "Irish Politics", "Corruption"] },
+  { id: 2, title: "Ben Dunne", type: "Businessman", tags: ["Moriarty Tribunal", "Business", "Corruption"] },
+  { id: 3, title: "Moriarty Tribunal", type: "Event", tags: ["Irish Politics", "Corruption", "Investigation"] },
+  { id: 4, title: "Dunne's Business Interests", type: "Company", tags: ["Ben Dunne", "Business", "Moriarty Tribunal"] },
+  { id: 5, title: "John O'Leary", type: "Politician", tags: ["Moriarty Tribunal", "Irish Politics"] },
+  { id: 6, title: "Moriarty Inquiry Findings", type: "Event", tags: ["Moriarty Tribunal", "Corruption"] },
+  { id: 7, title: "AIB Bank", type: "Company", tags: ["Business", "Moriarty Tribunal", "Corruption"] },
+  { id: 8, title: "Public Opinion", type: "Subject", tags: ["Moriarty Tribunal", "Irish Politics", "Corruption"] },
+  { id: 9, title: "Bribes and Payments", type: "Event", tags: ["Moriarty Tribunal", "Corruption", "Bribery"] },
+  { id: 10, title: "Irish Government Response", type: "Event", tags: ["Moriarty Tribunal", "Politics"] }
+];
+
+  const nodes = new vis.DataSet([]);
+  const edges = new vis.DataSet([]);
+  const nodeConnections = {};
+
+  const groups = {
+    Politician: {
+      color: { background: '#7f4b94', border: '#5a2d7b' }
+    },
+    Businessman: {
+      color: { background: '#53a6c1', border: '#1f4e5b' }
+    },
+    Company: {
+      color: { background: '#c0c2ff', border: '#8f90ff' }
+    },
+    Event: {
+      color: { background: '#ffdf87', border: '#d4b142' }
+    },
+    Subject: {
+      color: { background: '#5d81ff', border: '#3e5a99' }
+    }
+  };
+
+  items.forEach(item => {
+    const itemNode = {
+      id: item.id,
+      label: item.title,
+      title: `<h3>${item.title}</h3><ul>${item.tags.map(tag => `<li>${tag}</li>`).join('')}</ul>`,
+      group: item.type,
+      size: item.tags.length * 6, // Increased node size for larger visibility
+      font: { color: '#ffffff' }
+    };
+    nodes.add(itemNode);
+
+    item.tags.forEach(tag => {
+      const tagNode = nodes.get(tag);
+      if (!tagNode) {
+        nodes.add({ 
+          id: tag, 
+          label: tag, 
+          group: "Subject", // Default for undefined tags
+          font: { color: '#ffffff' }
+        });
+      }
+      edges.add({ 
+        from: item.id, 
+        to: tag,
+        color: { color: '#666666', highlight: '#999999' }
+      });
+
+      nodeConnections[tag] = (nodeConnections[tag] || 0) + 1;
+      nodeConnections[item.id] = (nodeConnections[item.id] || 0) + 1;
+    });
+  });
+
+  nodes.forEach(node => {
+    const connectionCount = nodeConnections[node.id] || 0;
+    node.size = Math.max(10, connectionCount * 3); // Increased size factor
+    nodes.update(node);
+  });
+
+  const container = document.getElementById("connections-graph");
+  const data = { nodes: nodes, edges: edges };
+
+  const options = {
+    nodes: {
+      shape: 'dot',
+      font: { size: 14 },
+      scaling: {
+        min: 10,
+        max: 25 // Max size for larger nodes
+      }
+    },
+    edges: {
+      width: 1,
+      smooth: {
+        type: 'continuous'
+      }
+    },
+    physics: {
+      enabled: false,
+      solver: 'forceAtlas2Based',
+      forceAtlas2Based: {
+        gravitationalConstant: -50,
+        centralGravity: 0.001,
+        springLength: 150,
+        springConstant: 0.08
+      },
+      stabilization: {
+        iterations: 100
+      }
+    },
+    interaction: {
+      hover: true,
+      zoomView: true,
+      dragView: true,
+      dragNodes: true,
+      zoomSpeed: 0.5,
+      tooltipDelay: 300
+    },
+    groups: groups,
+    layout: {
+      randomSeed: 2,
+      improvedLayout: true
+    }
+  };
+
+  const network = new vis.Network(container, data, options);
+
+  function applyCircularLayout() {
+    const positions = {};
+    const nodeCount = nodes.length;
+    const radius = 350;
+    const angle = (2 * Math.PI) / nodeCount;
+    const yOffset = -200; // Add an offset to raise the mandala
+    
+    let i = 0;
+    nodes.forEach((node) => {
+      positions[node.id] = {
+        x: radius * Math.cos(angle * i),
+        y: radius * Math.sin(angle * i)
+      };
+      i++;
+    });
+    
+    network.setOptions({ physics: { enabled: false } });
+    network.moveTo({ scale: 0.3 });
+    network.body.data.nodes.update(
+      nodes.map(node => ({
+        id: node.id,
+        x: positions[node.id].x,
+        y: positions[node.id].y
+      }))
+    );
+  }
+
+  network.moveTo({
+    position: { x: 0, y: 0 },
+    scale: 0.3,
+    animation: {
+      duration: 1000,
+      easingFunction: 'easeInOutQuad'
+    }
+  });
+
+  // Initial layout
+  applyCircularLayout();
+
+  const toggleButton = document.querySelector(".toggle-physics-button");
+  let isPhysicsEnabled = false;
+
+  toggleButton.addEventListener("click", function() {
+    isPhysicsEnabled = !isPhysicsEnabled;
+    if (isPhysicsEnabled) {
+      network.setOptions({ physics: { enabled: true } });
+    } else {
+      applyCircularLayout();
+      network.setOptions({ physics: { enabled: false } });
+    }
+  });
+});
+</script>
+
+</body>
+</html>
