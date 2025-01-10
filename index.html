@@ -29,7 +29,7 @@
       border: 1px solid #333;
       border-radius: 8px;
       overflow: hidden;
-      margin-top: -200px; /* Raises the graph by 100px */
+      margin-top: -200px;
     }
 
     .toggle-physics-button {
@@ -148,166 +148,187 @@ const items = [
   { id: 50, title: "Offshore Banking Locations", type: "Location", tags: ["Financial Investigation", "Banking", "International"] }
 ];
 
-  const nodes = new vis.DataSet([]);
-  const edges = new vis.DataSet([]);
-  const nodeConnections = {};
+ const nodes = new vis.DataSet([]);
+    const edges = new vis.DataSet([]);
+    const nodeConnections = {};
 
-  const groups = {
-    Politician: {
-      color: { background: '#7f4b94', border: '#5a2d7b' }
-    },
-    Businessman: {
-      color: { background: '#53a6c1', border: '#1f4e5b' }
-    },
-    Company: {
-      color: { background: '#c0c2ff', border: '#8f90ff' }
-    },
-    Event: {
-      color: { background: '#ffdf87', border: '#d4b142' }
-    },
-    Subject: {
-      color: { background: '#5d81ff', border: '#3e5a99' }
-    }
-  };
-
-  items.forEach(item => {
-    const itemNode = {
-      id: item.id,
-      label: item.title,
-      title: `<h3>${item.title}</h3><ul>${item.tags.map(tag => `<li>${tag}</li>`).join('')}</ul>`,
-      group: item.type,
-      size: item.tags.length * 6, // Increased node size for larger visibility
-      font: { color: '#ffffff' }
-    };
-    nodes.add(itemNode);
-
-    item.tags.forEach(tag => {
-      const tagNode = nodes.get(tag);
-      if (!tagNode) {
-        nodes.add({ 
-          id: tag, 
-          label: tag, 
-          group: "Subject", // Default for undefined tags
-          font: { color: '#ffffff' }
-        });
-      }
-      edges.add({ 
-        from: item.id, 
-        to: tag,
-        color: { color: '#666666', highlight: '#999999' }
-      });
-
-      nodeConnections[tag] = (nodeConnections[tag] || 0) + 1;
-      nodeConnections[item.id] = (nodeConnections[item.id] || 0) + 1;
-    });
-  });
-
-  nodes.forEach(node => {
-    const connectionCount = nodeConnections[node.id] || 0;
-    node.size = Math.max(10, connectionCount * 3); // Increased size factor
-    nodes.update(node);
-  });
-
-  const container = document.getElementById("connections-graph");
-  const data = { nodes: nodes, edges: edges };
-
-  const options = {
-    nodes: {
-      shape: 'dot',
-      font: { size: 14 },
-      scaling: {
-        min: 10,
-        max: 25 // Max size for larger nodes
-      }
-    },
-    edges: {
-      width: 1,
-      smooth: {
-        type: 'continuous'
-      }
-    },
-    physics: {
-      enabled: false,
-      solver: 'forceAtlas2Based',
-      forceAtlas2Based: {
-        gravitationalConstant: -50,
-        centralGravity: 0.001,
-        springLength: 150,
-        springConstant: 0.08
+    const groups = {
+      Politician: {
+        color: { background: '#7f4b94', border: '#5a2d7b' }
       },
-      stabilization: {
-        iterations: 100
+      Businessman: {
+        color: { background: '#53a6c1', border: '#1f4e5b' }
+      },
+      Company: {
+        color: { background: '#c0c2ff', border: '#8f90ff' }
+      },
+      Event: {
+        color: { background: '#ffdf87', border: '#d4b142' }
+      },
+      Subject: {
+        color: { background: '#5d81ff', border: '#3e5a99' }
       }
-    },
-    interaction: {
-      hover: true,
-      zoomView: true,
-      dragView: true,
-      dragNodes: true,
-      zoomSpeed: 0.5,
-      tooltipDelay: 300
-    },
-    groups: groups,
-    layout: {
-      randomSeed: 2,
-      improvedLayout: true
-    }
-  };
+    };
 
-  const network = new vis.Network(container, data, options);
-
-  function applyCircularLayout() {
-    const positions = {};
-    const nodeCount = nodes.length;
-    const radius = 350;
-    const angle = (2 * Math.PI) / nodeCount;
-    const yOffset = -200; // Add an offset to raise the mandala
-    
-    let i = 0;
-    nodes.forEach((node) => {
-      positions[node.id] = {
-        x: radius * Math.cos(angle * i),
-        y: radius * Math.sin(angle * i)
-      };
-      i++;
+    // First pass: Create all nodes and count their connections
+    items.forEach(item => {
+      nodeConnections[item.id] = 0;
+      item.tags.forEach(tag => {
+        if (!nodeConnections[tag]) {
+          nodeConnections[tag] = 0;
+        }
+        nodeConnections[item.id]++;
+        nodeConnections[tag]++;
+      });
     });
-    
-    network.setOptions({ physics: { enabled: false } });
-    network.moveTo({ scale: 0.3 });
-    network.body.data.nodes.update(
-      nodes.map(node => ({
-        id: node.id,
-        x: positions[node.id].x,
-        y: positions[node.id].y
-      }))
-    );
-  }
 
-  network.moveTo({
-    position: { x: 0, y: 0 },
-    scale: 0.3,
-    animation: {
-      duration: 1000,
-      easingFunction: 'easeInOutQuad'
-    }
-  });
+    // Find the maximum number of connections for scaling
+    const maxConnections = Math.max(...Object.values(nodeConnections));
 
-  // Initial layout
-  applyCircularLayout();
+    // Function to calculate node size based on connections
+    const calculateNodeSize = (connections) => {
+      const minSize = 15;
+      const maxSize = 50;
+      return minSize + (connections / maxConnections) * (maxSize - minSize);
+    };
 
-  const toggleButton = document.querySelector(".toggle-physics-button");
-  let isPhysicsEnabled = false;
+    // Second pass: Create nodes with proper sizing
+    items.forEach(item => {
+      const size = calculateNodeSize(nodeConnections[item.id]);
+      const itemNode = {
+        id: item.id,
+        label: item.title,
+        title: `<h3>${item.title}</h3><p>Connections: ${nodeConnections[item.id]}</p><ul>${item.tags.map(tag => `<li>${tag}</li>`).join('')}</ul>`,
+        group: item.type,
+        size: size,
+        font: { 
+          color: '#ffffff',
+          size: Math.max(14, 16 * (size / 50)) // Scale font size with node size
+        }
+      };
+      nodes.add(itemNode);
 
-  toggleButton.addEventListener("click", function() {
-    isPhysicsEnabled = !isPhysicsEnabled;
-    if (isPhysicsEnabled) {
-      network.setOptions({ physics: { enabled: true } });
-    } else {
-      applyCircularLayout();
+      // Create edges and tag nodes
+      item.tags.forEach(tag => {
+        if (!nodes.get(tag)) {
+          const tagSize = calculateNodeSize(nodeConnections[tag]);
+          nodes.add({
+            id: tag,
+            label: tag,
+            group: "Subject",
+            size: tagSize,
+            font: { 
+              color: '#ffffff',
+              size: Math.max(14, 16 * (tagSize / 50))
+            }
+          });
+        }
+        edges.add({
+          from: item.id,
+          to: tag,
+          color: { color: '#666666', highlight: '#999999' }
+        });
+      });
+    });
+
+    const container = document.getElementById("connections-graph");
+    const data = { nodes: nodes, edges: edges };
+
+    const options = {
+      nodes: {
+        shape: 'dot',
+        scaling: {
+          min: 15,
+          max: 50
+        }
+      },
+      edges: {
+        width: 1,
+        smooth: {
+          type: 'continuous'
+        }
+      },
+      physics: {
+        enabled: false,
+        solver: 'forceAtlas2Based',
+        forceAtlas2Based: {
+          gravitationalConstant: -50,
+          centralGravity: 0.001,
+          springLength: 150,
+          springConstant: 0.08
+        },
+        stabilization: {
+          iterations: 100
+        }
+      },
+      interaction: {
+        hover: true,
+        zoomView: true,
+        dragView: true,
+        dragNodes: true,
+        zoomSpeed: 0.5,
+        tooltipDelay: 300
+      },
+      groups: groups,
+      layout: {
+        randomSeed: 2,
+        improvedLayout: true
+      }
+    };
+
+    const network = new vis.Network(container, data, options);
+
+    function applyCircularLayout() {
+      const positions = {};
+      const nodeCount = nodes.length;
+      const radius = 350;
+      const angle = (2 * Math.PI) / nodeCount;
+      
+      let i = 0;
+      nodes.forEach((node) => {
+        positions[node.id] = {
+          x: radius * Math.cos(angle * i),
+          y: radius * Math.sin(angle * i)
+        };
+        i++;
+      });
+      
       network.setOptions({ physics: { enabled: false } });
+      network.moveTo({ scale: 0.3 });
+      network.body.data.nodes.update(
+        nodes.map(node => ({
+          id: node.id,
+          x: positions[node.id].x,
+          y: positions[node.id].y
+        }))
+      );
     }
+
+    network.moveTo({
+      position: { x: 0, y: 0 },
+      scale: 0.3,
+      animation: {
+        duration: 1000,
+        easingFunction: 'easeInOutQuad'
+      }
+    });
+
+    // Initial layout
+    applyCircularLayout();
+
+    const toggleButton = document.querySelector(".toggle-physics-button");
+    let isPhysicsEnabled = false;
+
+    toggleButton.addEventListener("click", function() {
+      isPhysicsEnabled = !isPhysicsEnabled;
+      if (isPhysicsEnabled) {
+        network.setOptions({ physics: { enabled: true } });
+      } else {
+        applyCircularLayout();
+        network.setOptions({ physics: { enabled: false } });
+      }
+    });
   });
-});
 </script>
 
 </body>
